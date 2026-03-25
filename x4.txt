@@ -1,0 +1,125 @@
+1-a)SELECT count(*) FROM employees;
+
+1-b)
+SELECT birth_date FROM employees
+ WHERE emp_no = 10003;
+
+1-c)
+SELECT first_name,last_name FROM employees
+WHERE emp_no=10002;
+
+1-d)
+SELECT * FROM employees 
+WHERE first_name = 'Mary';
+
+1-e)
+SELECT DISTINCT last_name
+FROM employees
+WHERE first_name = 'Mary';
+
+2-b)
+SELECT sysdate() FROM dual;
+
+SELECT SYSDATE(); /*also works
+
+2-c)
+SELECT 
+AVG(floor(datediff(curdate(), birth_date) / 365))
+as average_age_employees 
+FROM employees;
+
+
+3-a)
+SELECT 
+MAX(floor(datediff(curdate(),birth_date)/365)) as max_age,
+MIN(floor(datediff(curdate(),birth_date)/365)) as min_age
+FROM employees;
+
+
+
+3-b)
+SELECT
+AVG(FLOOR(DATEDIFF(CURDATE(), hire_date) / 365)) AS avg_years,
+MIN(FLOOR(DATEDIFF(CURDATE(), hire_date) / 365)) AS min_years,
+MAX(FLOOR(DATEDIFF(CURDATE(), hire_date) / 365)) AS max_years
+FROM employees;
+
+
+3-c)
+UPDATE employees
+SET birth_date = DATE_ADD(birth_date, INTERVAL 10 YEAR);
+
+SELECT * FROM employees;
+
+3-d)
+SELECT AVG(salary) as current_salary
+FROM salaries
+WHERE to_date = '9999-01-01';
+
+3-e)
+SELECT COUNT(title),emp_no 
+FROM titles 
+GROUP BY emp_no;
+
+SELECT * FROM titles;
+
+SELECT COUNT(distinct title) 
+FROM titles;
+
+
+3-f)
+SELECT emp_no, salary/12 AS monthly_salary
+FROM salaries
+WHERE salary = (
+    SELECT MAX(salary)
+    FROM salaries
+);
+
+SELECT emp_no, salary/12 AS monthly_salary
+FROM salaries
+WHERE salary = (
+    SELECT MIN(salary)
+    FROM salaries
+);
+
+3-g)
+SELECT 
+ CONCAT(LEFT(first_name,1), '. ', first_name,' ',LEFT(last_name,1),'. ',last_name) AS name
+FROM employees;
+
+
+3-h)
+SELECT *
+FROM employees
+WHERE LENGTH(last_name) = (
+    SELECT MAX(LENGTH(last_name))
+    FROM employees
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
