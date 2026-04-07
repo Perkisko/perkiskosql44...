@@ -1,0 +1,51 @@
+1-a
+SELECT dept_no, count(emp_no) as num
+FROM dept_emp
+GROUP BY dept_no;
+
+
+1-b
+SELECT dept_no, count(emp_no) as num
+FROM dept_emp
+GROUP BY dept_no
+ORDER BY num DESC;
+
+2-b
+SELECT emp_no, min(salary), max(salary)
+FROM salaries
+WHERE emp_no BETWEEN 10001 AND 10100
+GROUP BY emp_no;
+
+3-a
+SELECT
+MAX(floor(datediff(curdate(),birth_date)/365)) as max_age,
+MIN(floor(datediff(curdate(),birth_date)/365)) as min_age
+FROM employees
+WHERE emp_no BETWEEN 10001 AND 10100;
+
+3-b
+SELECT emp_no, 
+AVG(FLOOR(DATEDIFF(CURDATE(), hire_date)/365)) AS avg_years_worked,
+MAX(FLOOR(DATEDIFF(CURDATE(), hire_date) / 365)) AS max_years_worked,
+MIN(FLOOR(DATEDIFF(CURDATE(), hire_date) / 365)) AS min_years_worked
+FROM employees
+WHERE emp_no BETWEEN 10001 AND 10100
+GROUP BY emp_no
+ORDER BY avg_years_worked ASC;
+
+3-c
+SELECT emp_no,
+MAX(salary) AS max_salary,
+AVG(salary) AS avg_salary
+FROM salaries
+WHERE emp_no BETWEEN 10001 AND 10100
+GROUP BY emp_no
+ORDER BY avg_salary ASC;
+
+3-d
+SELECT emp_no,
+COUNT(DISTINCT title) AS different_positions
+FROM titles
+WHERE emp_no BETWEEN 10001 AND 10100
+GROUP BY emp_no
+ORDER BY different_positions DESC;
