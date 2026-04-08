@@ -49,3 +49,47 @@ FROM titles
 WHERE emp_no BETWEEN 10001 AND 10100
 GROUP BY emp_no
 ORDER BY different_positions DESC;
+
+
+
+
+SELECT
+    emp_no,
+    years_worked AS avg_years_worked,
+    years_worked AS min_years_worked,
+    years_worked AS max_years_worked
+FROM (
+    SELECT
+        emp_no,
+        TIMESTAMPDIFF(
+            YEAR,
+            MIN(from_date),
+            MAX(
+                CASE
+                    WHEN to_date = '9999-01-01' THEN CURDATE()
+                    ELSE to_date
+                END
+            )
+        ) AS years_worked
+    FROM dept_emp
+    WHERE emp_no BETWEEN 10001 AND 10100
+    GROUP BY emp_no
+) AS t
+ORDER BY avg_years_worked ASC;
+
+
+
+
+
+SELECT
+  emp_no,
+  ROUND(AVG(TIMESTAMPDIFF(DAY, from_date,
+    IFNULL(NULLIF(to_date, '9999-01-01'), CURDATE())) / 365.25), 2) AS avg_years_worked,
+  ROUND(MIN(TIMESTAMPDIFF(DAY, from_date,
+    IFNULL(NULLIF(to_date, '9999-01-01'), CURDATE())) / 365.25), 2) AS min_years_worked,
+  ROUND(MAX(TIMESTAMPDIFF(DAY, from_date,
+    IFNULL(NULLIF(to_date, '9999-01-01'), CURDATE())) / 365.25), 2) AS max_years_worked
+FROM dept_emp
+WHERE emp_no BETWEEN 10001 AND 10100
+GROUP BY emp_no
+ORDER BY avg_years_worked ASC;
