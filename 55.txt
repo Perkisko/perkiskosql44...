@@ -93,3 +93,45 @@ FROM dept_emp
 WHERE emp_no BETWEEN 10001 AND 10100
 GROUP BY emp_no
 ORDER BY avg_years_worked ASC;
+
+--------------
+
+SELECT
+emp_no,
+AVG(
+    FLOOR(
+        DATEDIFF(
+            CASE 
+                WHEN to_date = '9999-01-01' THEN CURDATE()
+                ELSE to_date
+            END,
+            from_date
+        ) / 365
+    )
+) AS avg_years_worked,
+MAX(
+    FLOOR(
+        DATEDIFF(
+            CASE 
+                WHEN to_date = '9999-01-01' THEN CURDATE()
+                ELSE to_date
+            END,
+            from_date
+        ) / 365
+    )
+) AS max_years_worked,
+MIN(
+    FLOOR(
+        DATEDIFF(
+            CASE 
+                WHEN to_date = '9999-01-01' THEN CURDATE()
+                ELSE to_date
+            END,
+            from_date
+        ) / 365
+    )
+) AS min_years_worked
+FROM dept_emp
+WHERE emp_no BETWEEN 10001 AND 10100
+GROUP BY emp_no
+ORDER BY avg_years_worked ASC;
