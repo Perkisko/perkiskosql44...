@@ -1,0 +1,104 @@
+1a
+SELECT * FROM employees
+WHERE emp_no IN( (SELECT emp_no FROM salaries
+WHERE salary = (SELECT max(salary) FROM salaries)));
+
+1b
+SELECT * FROM employees e1
+WHERE e1.emp_no =
+	(SELECT emp_no FROM dept_manager d1
+    WHERE e1.emp_no = d1.emp_no
+    and d1.dept_no = 'd001' and d1.to_date = '9999-01-01');
+
+1c
+SELECT d1.*, d2.cnt
+FROM departments d1,
+     (SELECT dept_no, COUNT(emp_no) AS cnt
+      FROM dept_emp
+      GROUP BY dept_no) AS d2
+WHERE d1.dept_no = d2.dept_no
+ORDER BY cnt DESC;
+
+2-b
+SELECT count(*) FROM employees e
+WHERE EXISTS (SELECT 1 FROM salaries s 
+			  WHERE s.emp_no = e.emp_no
+              and s.salary > 6000);
+	
+
+
+2-c
+SELECT count(*) FROM employees e 
+WHERE NOT EXISTS (SELECT 1 FROM salaries s
+					WHERE s.emp_no = e.emp_no
+                    and s.salary <= 6000);
+
+3-a
+SELECT *
+FROM employees
+WHERE birth_date = (
+    SELECT MAX(birth_date)
+    FROM employees
+);
+
+3-b
+SELECT *
+FROM employees e
+WHERE EXISTS (
+    SELECT 1
+    FROM titles t
+    WHERE t.emp_no = e.emp_no
+)
+AND NOT EXISTS (
+    SELECT 1
+    FROM titles t
+    WHERE t.emp_no = e.emp_no
+      AND t.title NOT LIKE '%Engineer%'
+);
+
+
+3-c
+SELECT e.emp_no, e.first_name, e.last_name
+FROM employees e
+WHERE EXISTS (
+    SELECT 1
+    FROM adr_emp ae
+    WHERE ae.emp_no = e.emp_no
+      AND EXISTS (
+          SELECT 1
+          FROM address a
+          WHERE a.adr_no = ae.adr_no
+            AND a.country = 'Austria'
+      )
+);
+
+
+3cc
+
+SELECT e.emp_no, e.first_name, e.last_name
+FROM employees e
+WHERE EXISTS (
+    SELECT 1
+    FROM adr_emp ae
+    WHERE ae.emp_no = e.emp_no
+      AND ae.adr_type = 'P'
+      AND EXISTS (
+          SELECT 1
+          FROM address a
+          WHERE a.adr_no = ae.adr_no
+            AND a.country = 'Austria'
+      )
+);
+
+3-d
+SELECT COUNT(DISTINCT emp_no)
+FROM dept_manager;
+
+3-dd
+SELECT COUNT(*)
+FROM employees e
+WHERE EXISTS (
+    SELECT 1
+    FROM dept_manager dm
+    WHERE dm.emp_no = e.emp_no
+);
