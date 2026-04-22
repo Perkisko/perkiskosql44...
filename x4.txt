@@ -4,9 +4,25 @@
 SELECT birth_date FROM employees
  WHERE emp_no = 10003;
 
-1-c)
-SELECT first_name,last_name FROM employees
-WHERE emp_no=10002;
+SELECT d1.dept_no,
+       d1.dept_name,
+       d2.country,
+       d2.cnt
+FROM departments d1
+INNER JOIN (
+    SELECT de.dept_no,
+           a.country,
+           COUNT(DISTINCT de.emp_no) AS cnt
+    FROM dept_emp de
+    INNER JOIN adr_emp ae
+        ON de.emp_no = ae.emp_no
+    INNER JOIN address a
+        ON ae.adr_no = a.adr_no
+    WHERE ae.adr_type = 'P'
+    GROUP BY de.dept_no, a.country
+) AS d2
+    ON d1.dept_no = d2.dept_no
+ORDER BY d1.dept_no, d2.cnt DESC;
 
 1-d)
 SELECT * FROM employees 
