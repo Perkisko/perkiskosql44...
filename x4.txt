@@ -1,5 +1,16 @@
-1-a)SELECT count(*) FROM employees;
-
+SELECT d.dept_no,
+       d.dept_name,
+       COUNT(DISTINCT a.country) AS country_count
+FROM departments d
+INNER JOIN dept_emp de
+    ON d.dept_no = de.dept_no
+INNER JOIN adr_emp ae
+    ON de.emp_no = ae.emp_no
+INNER JOIN address a
+    ON ae.adr_no = a.adr_no
+WHERE ae.adr_type = 'P'
+GROUP BY d.dept_no, d.dept_name
+ORDER BY country_count DESC;
 1-b)
 SELECT birth_date FROM employees
  WHERE emp_no = 10003;
