@@ -40,6 +40,9 @@ INNER JOIN address a
     ON ae.adr_no = a.adr_no
 WHERE de.dept_no = 'd002';
 
+If you want only employees currently in d002
+and de..to_date = '9999-01-01';
+
 -- 2(b)
 SELECT e.*, t.title
 FROM employees e
