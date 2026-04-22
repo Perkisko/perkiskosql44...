@@ -1,54 +1,23 @@
-SELECT d.dept_no,
-       d.dept_name,
-       COUNT(DISTINCT a.country) AS country_count
-FROM departments d
-INNER JOIN dept_emp de
-    ON d.dept_no = de.dept_no
+SELECT DISTINCT e.*
+FROM employees e
 INNER JOIN adr_emp ae
-    ON de.emp_no = ae.emp_no
+    ON e.emp_no = ae.emp_no
 INNER JOIN address a
     ON ae.adr_no = a.adr_no
-WHERE ae.adr_type = 'P'
-GROUP BY d.dept_no, d.dept_name
-ORDER BY country_count DESC;
-1-b)
-SELECT birth_date FROM employees
- WHERE emp_no = 10003;
-
-SELECT d1.dept_no,
-       d1.dept_name,
-       d2.country,
-       d2.cnt
-FROM departments d1
-INNER JOIN (
-    SELECT de.dept_no,
-           a.country,
-           COUNT(DISTINCT de.emp_no) AS cnt
-    FROM dept_emp de
-    INNER JOIN adr_emp ae
-        ON de.emp_no = ae.emp_no
-    INNER JOIN address a
-        ON ae.adr_no = a.adr_no
-    WHERE ae.adr_type = 'P'
-    GROUP BY de.dept_no, a.country
-) AS d2
-    ON d1.dept_no = d2.dept_no
-ORDER BY d1.dept_no, d2.cnt DESC;
-
-1-d)
-SELECT * FROM employees 
-WHERE first_name = 'Mary';
-
-1-e)
-SELECT DISTINCT last_name
-FROM employees
-WHERE first_name = 'Mary';
-
-2-b)
-SELECT sysdate() FROM dual;
-
-SELECT SYSDATE(); /*also works
-
+WHERE a.country = 'Sierra Leone'
+  AND ae.adr_type = 'T'
+  AND EXISTS (
+      SELECT 1
+      FROM dept_emp de1
+      WHERE de1.emp_no = e.emp_no
+        AND de1.dept_no = 'd004'
+  )
+  AND EXISTS (
+      SELECT 1
+      FROM dept_emp de2
+      WHERE de2.emp_no = e.emp_no
+        AND de2.dept_no = 'd006'
+  );
 2-c)
 SELECT 
 AVG(floor(datediff(curdate(), birth_date) / 365))
