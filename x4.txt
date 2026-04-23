@@ -1,9 +1,5 @@
-SELECT e.*, d.*
-FROM employees e
-INNER JOIN dept_manager dm
-    ON e.emp_no = dm.emp_no
-INNER JOIN departments d
-    ON dm.dept_no = d.dept_no;
+New-Item C:\reports-ps -Type Directory
+New-SMBShare -Name "reports-powershell" -Path c:\reports-ps -FullAccess "G_Sweden_Marketing" -ReadAccess "U_Marketing"
 
 SELECT e.*, d.*, t.title
 FROM employees e
