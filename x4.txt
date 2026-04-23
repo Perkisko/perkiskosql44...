@@ -1,6 +1,4 @@
-New-Item C:\reports-ps -Type Directory
-New-SMBShare -Name "reports-powershell" -Path c:\reports-ps -FullAccess "G_Sweden_Marketing" -ReadAccess "U_Marketing"
-
+New-PSDrive -Name R -PSProvider FileSystem -Root "\\dc1\reports-powershell" -Persist
 SELECT e.*, d.*, t.title
 FROM employees e
 INNER JOIN dept_manager dm
