@@ -1,7 +1,32 @@
-FirstName,LastName,Department,Path
-Anna,Test,IT,"OU=LabUsers,DC=lab,DC=local"
+Import-Module ActiveDirectory
 
+$users = Import-Csv users.csv
 
+foreach ($i in $users) {
+
+    $firstName = $i.FirstName
+    $lastName = $i.LastName
+    $department = $i.Department
+    $path = $i.Path
+
+    $fullName = "$firstName $lastName"
+    $loginName = "$firstName.$lastName".ToLower()
+    $password = ConvertTo-SecureString "Student.Pa55word!" -AsPlainText -Force
+
+    Write-Host "Creating user: $fullName with login name: $loginName"
+
+    New-ADUser `
+        -Name $fullName `
+        -GivenName $firstName `
+        -Surname $lastName `
+        -SamAccountName $loginName `
+        -UserPrincipalName "$loginName@lab.local" `
+        -Department $department `
+        -Path $path `
+        -AccountPassword $password `
+        -Enabled $true `
+        -ChangePasswordAtLogon $true
+}
 
 
 
