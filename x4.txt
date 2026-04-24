@@ -1,4 +1,4 @@
-param($Name, $Count)
+param($Name, [int] $Count=1)
 
 for($i = 1; $i -le $Count; $i++) {
     if(! $Name) {
