@@ -1,10 +1,12 @@
 param($Name)
 
-if(! $Name) {
-    Write-Host "Hello stranger!"
-}
-else {
-    Write-Host "Hello $($Name)!"
+for($i = 1; $i -le 3; $i++) {
+    if(! $Name) {
+        Write-Host "Hello stranger!"
+    }
+    else {
+        Write-Host "Hello $($Name)!"
+    }
 }
 
 
