@@ -1,5 +1,4 @@
-Get-Process | Where CPU -gt 1 | Sort CPU -Descending | Select Name,CPU,Id | ConvertTo-Csv | Out-File processes.csv
-
+Get-Process | Where ProcessName -eq "notepad" | Format-Table Name,Id,CPU
 
 
 
