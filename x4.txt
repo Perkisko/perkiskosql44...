@@ -1,6 +1,6 @@
-param($Name)
+param($Name, $Count)
 
-for($i = 1; $i -le 3; $i++) {
+for($i = 1; $i -le $Count; $i++) {
     if(! $Name) {
         Write-Host "Hello stranger!"
     }
@@ -8,8 +8,6 @@ for($i = 1; $i -le 3; $i++) {
         Write-Host "Hello $($Name)!"
     }
 }
-
-
 
 
 
