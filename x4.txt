@@ -1,13 +1,4 @@
-param($Name, [int] $Count=1)
-
-for($i = 1; $i -le $Count; $i++) {
-    if(! $Name) {
-        Write-Host ("Hello {0}!" -f "stranger")
-    }
-    else {
-        Write-Host ("Hello {0}!" -f $Name)
-    }
-}
+Get-Process | Where CPU -gt 1 | Sort CPU -Descending | Format-Table Name,CPU,Id
 
 
 
