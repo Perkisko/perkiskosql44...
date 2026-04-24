@@ -1,5 +1,4 @@
-Get-Process | Where { $_.ProcessName -ge "notepad" -and $_.CPU -le 0.5 }
-
+Get-Process | Where { $_.ProcessName -like "*note*" }
 
 
 
