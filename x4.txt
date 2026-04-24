@@ -1,6 +1,5 @@
-Get-Process | Where ProcessName -eq "notepad" | Format-Table Name,Id,CPU
-
-
+FirstName,LastName,Department,Path
+Anna,Test,IT,"OU=LabUsers,DC=lab,DC=local"
 
 
 
