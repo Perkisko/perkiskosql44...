@@ -1,5 +1,4 @@
-Get-Process | Where CPU -gt 1 | Sort CPU -Descending | Format-Table Name,CPU,Id
-
+Get-Process | Where { $_.ProcessName -ge "notepad" -and $_.CPU -le 0.5 }
 
 
 
