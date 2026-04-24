@@ -1,5 +1,4 @@
-Get-Process | Where { $_.ProcessName -like "*note*" }
-
+Get-Process | Where CPU -gt 1 | Sort CPU -Descending | Select Name,CPU,Id | ConvertTo-Html | Out-File processes.html
 
 
 
