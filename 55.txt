@@ -1,3 +1,22 @@
+INSERT INTO employees 
+(emp_no, birth_date, first_name, last_name, gender, hire_date)
+VALUES
+(900001, '1998-04-12', 'Adam', 'Kowalski', 'M', '2024-01-10'),
+(900002, '1999-09-23', 'Anna', 'Nowak', 'F', '2024-01-10');
+
+
+INSERT INTO address
+(city, street, house_no, post_code, country)
+VALUES
+('Wroclaw', 'Grunwaldzka', '10', '50-001', 'Poland'),
+('Warsaw', 'Marszalkowska', '25', '00-001', 'Poland');
+
+INSERT INTO adr_emp
+(emp_no, adr_no, adr_type)
+VALUES
+(900001, LAST_INSERT_ID() - 1, 'P'),
+(900002, LAST_INSERT_ID(), 'P');
+
 
 
 
