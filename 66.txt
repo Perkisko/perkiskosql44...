@@ -1,8 +1,13 @@
-1a
-SELECT * FROM employees
-WHERE emp_no IN( (SELECT emp_no FROM salaries
-WHERE salary = (SELECT max(salary) FROM salaries)));
-
+SELECT
+    a.country,
+    COUNT(DISTINCT e.emp_no) AS employees_count
+FROM employees e
+INNER JOIN adr_emp ae
+    ON e.emp_no = ae.emp_no
+INNER JOIN address a
+    ON ae.adr_no = a.adr_no
+GROUP BY a.country
+ORDER BY employees_count DESC;
 1b
 SELECT * FROM employees e1
 WHERE e1.emp_no =
