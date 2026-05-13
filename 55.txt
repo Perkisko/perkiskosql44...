@@ -1,82 +1,73 @@
-SELECT 'Total' AS city, COUNT(DISTINCT ae.emp_no) AS employees_count
-FROM adr_emp ae
-INNER JOIN dept_emp de
-    ON ae.emp_no = de.emp_no
-WHERE de.to_date = '9999-01-01'
+SELECT 'address' AS table_name, COUNT(*) AS columns_count
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME = 'address'
 
-UNION
+UNION ALL
 
-SELECT a.city AS city, COUNT(DISTINCT ae.emp_no) AS employees_count
-FROM address a
-INNER JOIN adr_emp ae
-    ON a.adr_no = ae.adr_no
-INNER JOIN dept_emp de
-    ON ae.emp_no = de.emp_no
-WHERE de.to_date = '9999-01-01'
-GROUP BY a.city;
+SELECT 'adr_emp', COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME = 'adr_emp'
 
+UNION ALL
 
+SELECT 'departments', COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME = 'departments'
 
+UNION ALL
 
+SELECT 'dept_emp', COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME = 'dept_emp'
 
+UNION ALL
 
+SELECT 'dept_manager', COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME = 'dept_manager'
 
+UNION ALL
 
-SELECT '< 30' AS age_range, COUNT(DISTINCT e.emp_no) AS employees_count
-FROM employees e
-INNER JOIN dept_emp de
-    ON e.emp_no = de.emp_no
-WHERE de.to_date = '9999-01-01'
-  AND TIMESTAMPDIFF(YEAR, e.birth_date, CURDATE()) < 30
+SELECT 'employees', COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME = 'employees'
 
-UNION
+UNION ALL
 
-SELECT '30 - 39' AS age_range, COUNT(DISTINCT e.emp_no) AS employees_count
-FROM employees e
-INNER JOIN dept_emp de
-    ON e.emp_no = de.emp_no
-WHERE de.to_date = '9999-01-01'
-  AND TIMESTAMPDIFF(YEAR, e.birth_date, CURDATE()) BETWEEN 30 AND 39
+SELECT 'salaries', COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME = 'salaries'
 
-UNION
+UNION ALL
 
-SELECT '40 - 49' AS age_range, COUNT(DISTINCT e.emp_no) AS employees_count
-FROM employees e
-INNER JOIN dept_emp de
-    ON e.emp_no = de.emp_no
-WHERE de.to_date = '9999-01-01'
-  AND TIMESTAMPDIFF(YEAR, e.birth_date, CURDATE()) BETWEEN 40 AND 49
-
-UNION
-
-SELECT '50 - 59' AS age_range, COUNT(DISTINCT e.emp_no) AS employees_count
-FROM employees e
-INNER JOIN dept_emp de
-    ON e.emp_no = de.emp_no
-WHERE de.to_date = '9999-01-01'
-  AND TIMESTAMPDIFF(YEAR, e.birth_date, CURDATE()) BETWEEN 50 AND 59
-
-UNION
-
-SELECT '60+' AS age_range, COUNT(DISTINCT e.emp_no) AS employees_count
-FROM employees e
-INNER JOIN dept_emp de
-    ON e.emp_no = de.emp_no
-WHERE de.to_date = '9999-01-01'
-  AND TIMESTAMPDIFF(YEAR, e.birth_date, CURDATE()) >= 60;
+SELECT 'titles', COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME = 'titles';
 
 
 
 
 
-
-SELECT 'Total' AS title, COUNT(DISTINCT emp_no) AS employees_count
-FROM titles
-WHERE to_date = '9999-01-01'
-
-UNION
-
-SELECT title, COUNT(DISTINCT emp_no) AS employees_count
-FROM titles
-WHERE to_date = '9999-01-01'
-GROUP BY title;
+SELECT TABLE_NAME AS table_name, COUNT(*) AS columns_count
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'employees'
+  AND TABLE_NAME IN (
+      'address',
+      'adr_emp',
+      'departments',
+      'dept_emp',
+      'dept_manager',
+      'employees',
+      'salaries',
+      'titles'
+  )
+GROUP BY TABLE_NAME
+ORDER BY TABLE_NAME;
