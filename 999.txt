@@ -1,0 +1,101 @@
+1a
+
+SELECT 'Total' AS department, COUNT(DISTINCT emp_no) AS employees_count
+FROM dept_emp
+
+UNION
+
+SELECT d.dept_name AS department, COUNT(DISTINCT e.emp_no) AS employees_count
+FROM departments d
+INNER JOIN dept_emp e
+    ON d.dept_no = e.dept_no
+WHERE e.to_date = '9999-01-01'
+GROUP BY d.dept_name;
+
+1b
+
+SELECT '< 50000' AS salary_range, COUNT(DISTINCT emp_no) AS employees_count
+FROM salaries
+WHERE salary < 50000 AND to_date = '9999-01-01'
+UNION
+SELECT '50000 <= 60000' AS salary_range, COUNT(DISTINCT emp_no) AS employees_count
+FROM salaries
+WHERE salary BETWEEN 50000 AND 60000 AND to_date = '9999-01-01'
+UNION
+SELECT '60000<' AS salary_range, COUNT(DISTINCT emp_no) AS employees_count
+FROM salaries
+WHERE salary > 60000 AND to_date = '9999-01-01';
+
+1c
+SELECT 'Total', count(distinct emp_no)  
+FROM dept_emp  
+UNION  
+SELECT '----', '-----' FROM dual 
+UNION  
+SELECT '----', '-----' FROM dual 
+UNION  
+SELECT d.dept_name, count(distinct emp_no)  
+FROM departments d 
+INNER JOIN dept_emp e 
+ON d.dept_no = e.dept_no 
+AND  e.to_date ='9999-01-01' 
+GROUP BY 1; 
+
+
+
+SELECT 'Total', count(distinct emp_no)  
+FROM dept_emp  
+UNION ALL 
+SELECT '----', '-----' FROM dual 
+UNION ALL 
+SELECT '----', '-----' FROM dual 
+UNION ALL 
+SELECT d.dept_name, count(distinct emp_no)  
+FROM departments d 
+INNER JOIN dept_emp e 
+ON d.dept_no = e.dept_no 
+AND  e.to_date ='9999-01-01' 
+GROUP BY 1 ; 
+
+2a
+SELECT 'Total' AS position, COUNT(DISTINCT emp_no) AS employees_count
+FROM titles WHERE to_date = '9999-01-01'
+UNION
+SELECT title AS position, COUNT(DISTINCT emp_no) AS employees_count
+FROM titles
+WHERE to_date = '9999-01-01'
+GROUP BY title;
+
+2b
+SELECT 'Total' AS department, COUNT(DISTINCT emp_no) AS employees_count
+FROM dept_emp WHERE to_date = '9999-01-01'
+UNION
+SELECT d.dept_name AS department, COUNT(DISTINCT e.emp_no) AS employees_count
+FROM departments d
+LEFT JOIN dept_emp e ON d.dept_no = e.dept_no AND e.to_date = '9999-01-01'
+GROUP BY d.dept_name;
+
+
+2c
+SELECT 'address' AS table_name, COUNT(*) AS rows_count
+FROM address
+UNION ALL
+SELECT 'adr_emp' AS table_name, COUNT(*) AS rows_count
+FROM adr_emp
+UNION ALL
+SELECT 'departments' AS table_name, COUNT(*) AS rows_count
+FROM departments
+UNION ALL
+SELECT 'dept_emp' AS table_name, COUNT(*) AS rows_count
+FROM dept_emp
+UNION ALL
+SELECT 'dept_manager' AS table_name, COUNT(*) AS rows_count
+FROM dept_manager
+UNION ALL
+SELECT 'employees' AS table_name, COUNT(*) AS rows_count
+FROM employees
+UNION ALL
+SELECT 'salaries' AS table_name, COUNT(*) AS rows_count
+FROM salaries
+UNION ALL
+SELECT 'titles' AS table_name, COUNT(*) AS rows_count FROM titles;
