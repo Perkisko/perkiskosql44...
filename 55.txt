@@ -64,3 +64,19 @@ INNER JOIN dept_emp de
     ON e.emp_no = de.emp_no
 WHERE de.to_date = '9999-01-01'
   AND TIMESTAMPDIFF(YEAR, e.birth_date, CURDATE()) >= 60;
+
+
+
+
+
+
+SELECT 'Total' AS title, COUNT(DISTINCT emp_no) AS employees_count
+FROM titles
+WHERE to_date = '9999-01-01'
+
+UNION
+
+SELECT title, COUNT(DISTINCT emp_no) AS employees_count
+FROM titles
+WHERE to_date = '9999-01-01'
+GROUP BY title;
