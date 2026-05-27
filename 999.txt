@@ -1,101 +1,60 @@
-
 /* ------------------------------------------------------------
-   Task 2a
-   Oldest and youngest employee in each department
+   Task 2c
+   Finding employees who worked in departments d004 and d005
+   and are living in the same city
    Reusing the same view
    ------------------------------------------------------------ */
 
-CREATE OR REPLACE VIEW emp_dept_age AS
+
+/* View containing employees, their department history, and addresses */
+
+CREATE OR REPLACE VIEW emp_dept_address AS
 SELECT
     e.emp_no,
     e.first_name,
     e.last_name,
-    e.birth_date,
-    TIMESTAMPDIFF(YEAR, e.birth_date, CURDATE()) AS age,
-    d.dept_no,
-    d.dept_name
+    de.dept_no,
+    de.from_date AS dept_from_date,
+    de.to_date AS dept_to_date,
+    ae.adr_type,
+    a.adr_no,
+    a.city,
+    a.street,
+    a.house_no,
+    a.post_code,
+    a.country
 FROM employees e
-JOIN current_dept_emp cde
-    ON e.emp_no = cde.emp_no
-JOIN departments d
-    ON cde.dept_no = d.dept_no;
+JOIN dept_emp de
+    ON e.emp_no = de.emp_no
+JOIN adr_emp ae
+    ON e.emp_no = ae.emp_no
+JOIN address a
+    ON ae.adr_no = a.adr_no;
 
 
-/* Oldest and youngest using grouped values instead of repeated subqueries */
+/* Reuse the same view:
+   employees who worked in both d004 and d005,
+   grouped by the same city */
 
 SELECT
-    eda.dept_no,
-    eda.dept_name,
+    eda.city,
     eda.emp_no,
     eda.first_name,
     eda.last_name,
-    eda.birth_date,
-    eda.age,
-    'OLDEST' AS age_type
-FROM emp_dept_age eda
-JOIN (
-    SELECT
-        dept_no,
-        MIN(birth_date) AS target_birth_date
-    FROM emp_dept_age
-    GROUP BY dept_no
-) oldest
-    ON eda.dept_no = oldest.dept_no
-   AND eda.birth_date = oldest.target_birth_date
-
-UNION
-
-SELECT
-    eda.dept_no,
-    eda.dept_name,
+    eda.country,
+    eda.street,
+    eda.house_no,
+    eda.post_code
+FROM emp_dept_address eda
+WHERE eda.dept_no IN ('d004', 'd005')
+GROUP BY
+    eda.city,
     eda.emp_no,
     eda.first_name,
     eda.last_name,
-    eda.birth_date,
-    eda.age,
-    'YOUNGEST' AS age_type
-FROM emp_dept_age eda
-JOIN (
-    SELECT
-        dept_no,
-        MAX(birth_date) AS target_birth_date
-    FROM emp_dept_age
-    GROUP BY dept_no
-) youngest
-    ON eda.dept_no = youngest.dept_no
-   AND eda.birth_date = youngest.target_birth_date
-
-ORDER BY dept_no, age_type, birth_date;
-2b
-SELECT 'Total' AS department, COUNT(DISTINCT emp_no) AS employees_count
-FROM dept_emp WHERE to_date = '9999-01-01'
-UNION
-SELECT d.dept_name AS department, COUNT(DISTINCT e.emp_no) AS employees_count
-FROM departments d
-LEFT JOIN dept_emp e ON d.dept_no = e.dept_no AND e.to_date = '9999-01-01'
-GROUP BY d.dept_name;
-
-
-2c
-SELECT 'address' AS table_name, COUNT(*) AS rows_count
-FROM address
-UNION ALL
-SELECT 'adr_emp' AS table_name, COUNT(*) AS rows_count
-FROM adr_emp
-UNION ALL
-SELECT 'departments' AS table_name, COUNT(*) AS rows_count
-FROM departments
-UNION ALL
-SELECT 'dept_emp' AS table_name, COUNT(*) AS rows_count
-FROM dept_emp
-UNION ALL
-SELECT 'dept_manager' AS table_name, COUNT(*) AS rows_count
-FROM dept_manager
-UNION ALL
-SELECT 'employees' AS table_name, COUNT(*) AS rows_count
-FROM employees
-UNION ALL
-SELECT 'salaries' AS table_name, COUNT(*) AS rows_count
-FROM salaries
-UNION ALL
-SELECT 'titles' AS table_name, COUNT(*) AS rows_count FROM titles;
+    eda.country,
+    eda.street,
+    eda.house_no,
+    eda.post_code
+HAVING COUNT(DISTINCT eda.dept_no) = 2
+ORDER BY eda.city, eda.emp_no;
