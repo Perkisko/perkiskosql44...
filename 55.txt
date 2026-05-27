@@ -61,4 +61,12 @@ WHERE eda.birth_date = (
     WHERE eda2.dept_no = eda.dept_no
 )
 
+
+
+
+SET SESSION net_read_timeout = 120;
+SET SESSION net_write_timeout = 120;
+SET SESSION wait_timeout = 600;
+SET SESSION interactive_timeout = 600;
+
 ORDER BY dept_no, age_type, birth_date;
