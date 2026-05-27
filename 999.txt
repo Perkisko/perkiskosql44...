@@ -1,71 +1,71 @@
-1a
 
-SELECT 'Total' AS department, COUNT(DISTINCT emp_no) AS employees_count
-FROM dept_emp
+/* ------------------------------------------------------------
+   Task 2a
+   Oldest and youngest employee in each department
+   Reusing the same view
+   ------------------------------------------------------------ */
+
+CREATE OR REPLACE VIEW emp_dept_age AS
+SELECT
+    e.emp_no,
+    e.first_name,
+    e.last_name,
+    e.birth_date,
+    TIMESTAMPDIFF(YEAR, e.birth_date, CURDATE()) AS age,
+    d.dept_no,
+    d.dept_name
+FROM employees e
+JOIN current_dept_emp cde
+    ON e.emp_no = cde.emp_no
+JOIN departments d
+    ON cde.dept_no = d.dept_no;
+
+
+/* Oldest and youngest using grouped values instead of repeated subqueries */
+
+SELECT
+    eda.dept_no,
+    eda.dept_name,
+    eda.emp_no,
+    eda.first_name,
+    eda.last_name,
+    eda.birth_date,
+    eda.age,
+    'OLDEST' AS age_type
+FROM emp_dept_age eda
+JOIN (
+    SELECT
+        dept_no,
+        MIN(birth_date) AS target_birth_date
+    FROM emp_dept_age
+    GROUP BY dept_no
+) oldest
+    ON eda.dept_no = oldest.dept_no
+   AND eda.birth_date = oldest.target_birth_date
 
 UNION
 
-SELECT d.dept_name AS department, COUNT(DISTINCT e.emp_no) AS employees_count
-FROM departments d
-INNER JOIN dept_emp e
-    ON d.dept_no = e.dept_no
-WHERE e.to_date = '9999-01-01'
-GROUP BY d.dept_name;
+SELECT
+    eda.dept_no,
+    eda.dept_name,
+    eda.emp_no,
+    eda.first_name,
+    eda.last_name,
+    eda.birth_date,
+    eda.age,
+    'YOUNGEST' AS age_type
+FROM emp_dept_age eda
+JOIN (
+    SELECT
+        dept_no,
+        MAX(birth_date) AS target_birth_date
+    FROM emp_dept_age
+    GROUP BY dept_no
+) youngest
+    ON eda.dept_no = youngest.dept_no
+   AND eda.birth_date = youngest.target_birth_date
 
-1b
-
-SELECT '< 50000' AS salary_range, COUNT(DISTINCT emp_no) AS employees_count
-FROM salaries
-WHERE salary < 50000 AND to_date = '9999-01-01'
-UNION
-SELECT '50000 <= 60000' AS salary_range, COUNT(DISTINCT emp_no) AS employees_count
-FROM salaries
-WHERE salary BETWEEN 50000 AND 60000 AND to_date = '9999-01-01'
-UNION
-SELECT '60000<' AS salary_range, COUNT(DISTINCT emp_no) AS employees_count
-FROM salaries
-WHERE salary > 60000 AND to_date = '9999-01-01';
-
-1c
-SELECT 'Total', count(distinct emp_no)  
-FROM dept_emp  
-UNION  
-SELECT '----', '-----' FROM dual 
-UNION  
-SELECT '----', '-----' FROM dual 
-UNION  
-SELECT d.dept_name, count(distinct emp_no)  
-FROM departments d 
-INNER JOIN dept_emp e 
-ON d.dept_no = e.dept_no 
-AND  e.to_date ='9999-01-01' 
-GROUP BY 1; 
-
-
-
-SELECT 'Total', count(distinct emp_no)  
-FROM dept_emp  
-UNION ALL 
-SELECT '----', '-----' FROM dual 
-UNION ALL 
-SELECT '----', '-----' FROM dual 
-UNION ALL 
-SELECT d.dept_name, count(distinct emp_no)  
-FROM departments d 
-INNER JOIN dept_emp e 
-ON d.dept_no = e.dept_no 
-AND  e.to_date ='9999-01-01' 
-GROUP BY 1 ; 
-
-2a
-SELECT 'Total' AS position, COUNT(DISTINCT emp_no) AS employees_count
-FROM titles WHERE to_date = '9999-01-01'
-UNION
-SELECT title AS position, COUNT(DISTINCT emp_no) AS employees_count
-FROM titles
-WHERE to_date = '9999-01-01'
-GROUP BY title;
-
+ORDER BY dept_no, age_type, birth_date;
 2b
 SELECT 'Total' AS department, COUNT(DISTINCT emp_no) AS employees_count
 FROM dept_emp WHERE to_date = '9999-01-01'
