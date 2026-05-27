@@ -1,31 +1,56 @@
 /* ------------------------------------------------------------
    Task 1
-   Current assignment of employee to country instead of department
+   Assignment of employee to address location: country and city
    ------------------------------------------------------------ */
 
-CREATE OR REPLACE VIEW emp_adr_latest_date AS
+CREATE OR REPLACE VIEW emp_location AS
 SELECT
-    adr_emp.emp_no AS emp_no,
-    MAX(adr_emp.adr_no) AS adr_no
-FROM adr_emp
-GROUP BY adr_emp.emp_no;
-
-
-CREATE OR REPLACE VIEW current_emp_country AS
-SELECT
-    l.emp_no AS emp_no,
-    a.country AS country
-FROM emp_adr_latest_date l
+    e.emp_no,
+    e.first_name,
+    e.last_name,
+    ae.adr_type,
+    a.adr_no,
+    a.country,
+    a.city
+FROM employees e
+JOIN adr_emp ae
+    ON e.emp_no = ae.emp_no
 JOIN address a
-    ON l.adr_no = a.adr_no;
+    ON ae.adr_no = a.adr_no;
 
 
-/* Sample tests */
+/* Reuse the same view for countries */
 
-SELECT *
-FROM emp_adr_latest_date
-LIMIT 20;
+SELECT
+    emp_no,
+    first_name,
+    last_name,
+    adr_type,
+    country
+FROM emp_location
+ORDER BY emp_no;
 
-SELECT *
-FROM current_emp_country
-LIMIT 20;
+
+/* Reuse the same view for cities */
+
+SELECT
+    emp_no,
+    first_name,
+    last_name,
+    adr_type,
+    city
+FROM emp_location
+ORDER BY emp_no;
+
+
+/* Reuse the same view for both country and city */
+
+SELECT
+    emp_no,
+    first_name,
+    last_name,
+    adr_type,
+    country,
+    city
+FROM emp_location
+ORDER BY emp_no;
