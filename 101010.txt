@@ -1,0 +1,161 @@
+1-)
+CREATE OR REPLACE VIEW dept_emp_latest_date AS
+SELECT 
+    dept_emp.emp_no AS emp_no,
+    MAX(dept_emp.from_date) AS from_date,
+    MAX(dept_emp.to_date) AS to_date
+FROM dept_emp
+GROUP BY dept_emp.emp_no;
+
+CREATE OR REPLACE VIEW current_dept_emp AS
+SELECT 
+    l.emp_no AS emp_no,
+    d.dept_no AS dept_no,
+    l.from_date AS from_date,
+    l.to_date AS to_date
+FROM dept_emp d
+JOIN dept_emp_latest_date l
+    ON d.emp_no = l.emp_no
+   AND d.from_date = l.from_date
+   AND d.to_date = l.to_date;
+
+SELECT * 
+FROM dept_emp_latest_date
+LIMIT 20;
+
+SELECT * 
+FROM current_dept_emp
+LIMIT 20;
+  
+
+2a)
+CREATE OR REPLACE VIEW emp_dept_salary AS
+SELECT
+    e.emp_no,
+    e.first_name,
+    e.last_name,
+    d.dept_no,
+    d.dept_name,
+    s.salary,
+    s.from_date AS salary_from_date,
+    s.to_date AS salary_to_date
+FROM employees e
+JOIN current_dept_emp cde
+    ON e.emp_no = cde.emp_no
+JOIN departments d
+    ON cde.dept_no = d.dept_no
+JOIN salaries s
+    ON e.emp_no = s.emp_no
+WHERE s.to_date = '9999-01-01';
+
+
+CREATE OR REPLACE VIEW dept_min_max_salary AS
+SELECT
+    dept_no,
+    MIN(salary) AS min_salary,
+    MAX(salary) AS max_salary
+FROM emp_dept_salary
+GROUP BY dept_no;
+SELECT
+    eds.dept_no,
+    eds.dept_name,
+    eds.emp_no,
+    eds.first_name,
+    eds.last_name,
+    eds.salary,
+    'MIN SALARY' AS salary_type
+FROM emp_dept_salary eds
+JOIN dept_min_max_salary dmms
+    ON eds.dept_no = dmms.dept_no
+   AND eds.salary = dmms.min_salary
+UNION
+SELECT
+    eds.dept_no,
+    eds.dept_name,
+    eds.emp_no,
+    eds.first_name,
+    eds.last_name,
+    eds.salary,
+    'MAX SALARY' AS salary_type
+FROM emp_dept_salary eds
+JOIN dept_min_max_salary dmms
+    ON eds.dept_no = dmms.dept_no
+   AND eds.salary = dmms.max_salary
+
+ORDER BY dept_no, salary_type, salary;
+
+
+2b)
+CREATE OR REPLACE VIEW emp_positions AS
+SELECT e.emp_no, e.first_name, e.last_name, t.title,
+    t.from_date,
+    t.to_date
+FROM employees e
+JOIN titles t
+    ON e.emp_no = t.emp_no;
+    
+    SELECT DISTINCT
+    ep.emp_no,
+    ep.first_name,
+    ep.last_name
+FROM emp_positions ep
+WHERE ep.emp_no NOT IN (
+    SELECT emp_no
+    FROM emp_positions
+    WHERE title NOT LIKE '%Engineer%'
+)
+ORDER BY ep.emp_no;
+
+
+SELECT
+    ep.emp_no,
+    ep.first_name,
+    ep.last_name,
+    ep.title,
+    ep.from_date,
+    ep.to_date
+FROM emp_positions ep
+WHERE ep.emp_no NOT IN (
+    SELECT emp_no
+    FROM emp_positions
+    WHERE title NOT LIKE '%Engineer%'
+)
+ORDER BY ep.emp_no, ep.from_date;
+
+
+2c)
+CREATE OR REPLACE VIEW emp_addresses AS
+SELECT
+    e.emp_no,
+    e.first_name,
+    e.last_name,
+    ae.adr_type,
+    a.adr_no,
+    a.city,
+    a.street,
+    a.house_no,
+    a.post_code,
+    a.country
+FROM employees e
+JOIN adr_emp ae
+    ON e.emp_no = ae.emp_no
+JOIN address a
+    ON ae.adr_no = a.adr_no;
+    
+    
+   SELECT DISTINCT
+    ea.emp_no,
+    ea.first_name,
+    ea.last_name,
+    ea.adr_type,
+    ea.city,
+    ea.street,
+    ea.house_no,
+    ea.post_code,
+    ea.country
+FROM emp_addresses ea
+JOIN dept_emp de
+    ON ea.emp_no = de.emp_no
+WHERE de.dept_no = 'd003'
+  AND ea.country = 'Austria'
+ORDER BY ea.emp_no; 
