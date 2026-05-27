@@ -1,1 +1,31 @@
+/* ------------------------------------------------------------
+   Task 1
+   Current assignment of employee to country instead of department
+   ------------------------------------------------------------ */
 
+CREATE OR REPLACE VIEW emp_adr_latest_date AS
+SELECT
+    adr_emp.emp_no AS emp_no,
+    MAX(adr_emp.adr_no) AS adr_no
+FROM adr_emp
+GROUP BY adr_emp.emp_no;
+
+
+CREATE OR REPLACE VIEW current_emp_country AS
+SELECT
+    l.emp_no AS emp_no,
+    a.country AS country
+FROM emp_adr_latest_date l
+JOIN address a
+    ON l.adr_no = a.adr_no;
+
+
+/* Sample tests */
+
+SELECT *
+FROM emp_adr_latest_date
+LIMIT 20;
+
+SELECT *
+FROM current_emp_country
+LIMIT 20;
