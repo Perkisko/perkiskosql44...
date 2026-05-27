@@ -1,9 +1,10 @@
 /* ------------------------------------------------------------
    Task 1
-   Assignment of employee to address location: country and city
+   Assignment of employee to country and city
+   Reusing the same view: current_emp_country
    ------------------------------------------------------------ */
 
-CREATE OR REPLACE VIEW emp_location AS
+CREATE OR REPLACE VIEW current_emp_country AS
 SELECT
     e.emp_no,
     e.first_name,
@@ -19,7 +20,7 @@ JOIN address a
     ON ae.adr_no = a.adr_no;
 
 
-/* Reuse the same view for countries */
+/* Reuse current_emp_country for countries */
 
 SELECT
     emp_no,
@@ -27,11 +28,11 @@ SELECT
     last_name,
     adr_type,
     country
-FROM emp_location
+FROM current_emp_country
 ORDER BY emp_no;
 
 
-/* Reuse the same view for cities */
+/* Reuse current_emp_country for cities */
 
 SELECT
     emp_no,
@@ -39,11 +40,11 @@ SELECT
     last_name,
     adr_type,
     city
-FROM emp_location
+FROM current_emp_country
 ORDER BY emp_no;
 
 
-/* Reuse the same view for both country and city */
+/* Reuse current_emp_country for both country and city */
 
 SELECT
     emp_no,
@@ -52,5 +53,5 @@ SELECT
     adr_type,
     country,
     city
-FROM emp_location
+FROM current_emp_country
 ORDER BY emp_no;
