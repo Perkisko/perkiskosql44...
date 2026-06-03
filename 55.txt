@@ -2,6 +2,58 @@ WITH RECURSIVE dept_tree AS
 (
     SELECT
         dorg.dept_no AS root_dept_no,
+        dorg.dept_no AS dept_no,
+        1 AS hierarchy_level
+    FROM dept_org dorg
+    WHERE dorg.org_no IS NULL
+
+    UNION ALL
+
+    SELECT
+        parent.root_dept_no,
+        child.dept_no,
+        parent.hierarchy_level + 1 AS hierarchy_level
+    FROM dept_tree parent
+    INNER JOIN dept_org child
+        ON child.org_no = parent.dept_no
+)
+SELECT
+    dt.root_dept_no,
+    root_dept.dept_name AS root_dept_name,
+    dt.dept_no AS child_dept_no,
+    child_dept.dept_name AS child_dept_name,
+    dt.hierarchy_level,
+    COUNT(DISTINCT de.emp_no) AS number_of_employees
+FROM dept_tree dt
+INNER JOIN departments root_dept
+    ON dt.root_dept_no = root_dept.dept_no
+INNER JOIN departments child_dept
+    ON dt.dept_no = child_dept.dept_no
+LEFT JOIN dept_emp de
+    ON dt.dept_no = de.dept_no
+   AND de.to_date = '9999-01-01'
+GROUP BY
+    dt.root_dept_no,
+    root_dept.dept_name,
+    dt.dept_no,
+    child_dept.dept_name,
+    dt.hierarchy_level
+ORDER BY
+    dt.root_dept_no,
+    dt.hierarchy_level,
+    dt.dept_no;
+
+
+
+
+
+
+
+
+WITH RECURSIVE dept_tree AS
+(
+    SELECT
+        dorg.dept_no AS root_dept_no,
         dorg.dept_no AS dept_no
     FROM dept_org dorg
     WHERE dorg.org_no IS NULL
