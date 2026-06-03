@@ -1,0 +1,201 @@
+/* ============================================================
+   Exercise 11 - WITH / Common Table Expressions
+   ============================================================ */
+
+
+/* ============================================================
+   1. Simple CTE
+   ============================================================ */
+
+WITH cte AS
+(
+    SELECT 1 AS number
+    UNION ALL
+    SELECT 2
+)
+SELECT *
+FROM cte;
+
+
+/* ============================================================
+   2. Recursive CTE
+   ============================================================ */
+
+WITH RECURSIVE cte (n) AS
+(
+    SELECT 1
+    UNION ALL
+    SELECT n * 2
+    FROM cte
+    WHERE n < 32
+)
+SELECT *
+FROM cte;
+
+
+/* ============================================================
+   3. Department hierarchy setup
+   ============================================================ */
+
+INSERT INTO departments
+VALUES ('d000', 'Headquater');
+
+CREATE TABLE dept_org
+(
+    dept_no CHAR(4) NOT NULL,
+    org_no CHAR(4),
+    PRIMARY KEY (dept_no)
+);
+
+INSERT INTO dept_org VALUES
+('d001', 'd007'),
+('d002', 'd000'),
+('d003', 'd000'),
+('d004', 'd000'),
+('d005', 'd004'),
+('d006', 'd004'),
+('d007', 'd000'),
+('d008', 'd004'),
+('d009', 'd007'),
+('d010', 'd000'),
+('d000', NULL);
+
+
+/* ============================================================
+   3a. Display hierarchy level of each department
+   ============================================================ */
+
+WITH RECURSIVE dept_levels AS
+(
+    SELECT
+        dorg.dept_no,
+        dorg.org_no,
+        1 AS hierarchy_level
+    FROM dept_org dorg
+    WHERE dorg.org_no IS NULL
+
+    UNION ALL
+
+    SELECT
+        child.dept_no,
+        child.org_no,
+        parent.hierarchy_level + 1 AS hierarchy_level
+    FROM dept_org child
+    INNER JOIN dept_levels parent
+        ON child.org_no = parent.dept_no
+)
+SELECT
+    dl.dept_no,
+    d.dept_name,
+    dl.org_no AS parent_dept_no,
+    dl.hierarchy_level
+FROM dept_levels dl
+INNER JOIN departments d
+    ON dl.dept_no = d.dept_no
+ORDER BY dl.hierarchy_level, dl.dept_no;
+
+
+/* ============================================================
+   3b. Count employees across each organization branch
+   ============================================================ */
+
+WITH RECURSIVE dept_paths AS
+(
+    SELECT
+        dorg.dept_no,
+        dorg.org_no,
+        CAST(dorg.dept_no AS CHAR(200)) AS dept_path
+    FROM dept_org dorg
+    WHERE dorg.org_no IS NULL
+
+    UNION ALL
+
+    SELECT
+        child.dept_no,
+        child.org_no,
+        CONCAT(parent.dept_path, ',', child.dept_no) AS dept_path
+    FROM dept_org child
+    INNER JOIN dept_paths parent
+        ON child.org_no = parent.dept_no
+),
+leaf_paths AS
+(
+    SELECT dp.*
+    FROM dept_paths dp
+    LEFT JOIN dept_org child
+        ON dp.dept_no = child.org_no
+    WHERE child.dept_no IS NULL
+)
+SELECT
+    lp.dept_path AS organization_branch,
+    COUNT(DISTINCT de.emp_no) AS number_of_employees
+FROM leaf_paths lp
+LEFT JOIN dept_emp de
+    ON FIND_IN_SET(de.dept_no, lp.dept_path)
+   AND de.to_date = '9999-01-01'
+GROUP BY lp.dept_path
+ORDER BY lp.dept_path;
+
+
+/* ============================================================
+   3c. Display hierarchy of managers of departments
+   ============================================================ */
+
+WITH RECURSIVE manager_tree AS
+(
+    SELECT
+        dorg.dept_no,
+        d.dept_name,
+        dorg.org_no AS parent_dept_no,
+        1 AS hierarchy_level,
+        CAST(
+            CONCAT(
+                d.dept_name,
+                ' / ',
+                COALESCE(CONCAT(e.first_name, ' ', e.last_name), 'No current manager')
+            )
+            AS CHAR(1000)
+        ) AS manager_hierarchy
+    FROM dept_org dorg
+    INNER JOIN departments d
+        ON dorg.dept_no = d.dept_no
+    LEFT JOIN dept_manager dm
+        ON dorg.dept_no = dm.dept_no
+       AND dm.to_date = '9999-01-01'
+    LEFT JOIN employees e
+        ON dm.emp_no = e.emp_no
+    WHERE dorg.org_no IS NULL
+
+    UNION ALL
+
+    SELECT
+        child.dept_no,
+        d.dept_name,
+        child.org_no AS parent_dept_no,
+        parent.hierarchy_level + 1 AS hierarchy_level,
+        CONCAT(
+            parent.manager_hierarchy,
+            ' -> ',
+            d.dept_name,
+            ' / ',
+            COALESCE(CONCAT(e.first_name, ' ', e.last_name), 'No current manager')
+        ) AS manager_hierarchy
+    FROM manager_tree parent
+    INNER JOIN dept_org child
+        ON parent.dept_no = child.org_no
+    INNER JOIN departments d
+        ON child.dept_no = d.dept_no
+    LEFT JOIN dept_manager dm
+        ON child.dept_no = dm.dept_no
+       AND dm.to_date = '9999-01-01'
+    LEFT JOIN employees e
+        ON dm.emp_no = e.emp_no
+)
+SELECT
+    dept_no,
+    dept_name,
+    parent_dept_no,
+    hierarchy_level,
+    manager_hierarchy
+FROM manager_tree
+ORDER BY manager_hierarchy;
