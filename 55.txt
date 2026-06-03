@@ -1,3 +1,28 @@
+WITH RECURSIVE numbers AS
+(
+    SELECT 7 AS n
+
+    UNION ALL
+
+    SELECT n + 1
+    FROM numbers
+    WHERE n < 37
+)
+SELECT *
+FROM numbers;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 WITH hired_before_year AS
 (
