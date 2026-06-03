@@ -1,4 +1,33 @@
- /* ------------------------------------------------------------
+
+WITH hired_before_year AS
+(
+    SELECT
+        emp_no,
+        first_name,
+        last_name,
+        gender,
+        birth_date,
+        hire_date
+    FROM employees
+    WHERE YEAR(hire_date) < 1990
+)
+SELECT
+    emp_no,
+    first_name,
+    last_name,
+    gender,
+    birth_date,
+    hire_date
+FROM hired_before_year
+ORDER BY hire_date;
+
+
+
+
+
+
+
+/* ------------------------------------------------------------
    Task 2c
    Finding employees who worked in departments d004 and d005
    and are living in the same city: Istanbul
