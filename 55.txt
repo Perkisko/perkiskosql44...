@@ -1,115 +1,77 @@
-WITH RECURSIVE numbers AS
+    WITH RECURSIVE dept_tree AS
 (
-    SELECT 7 AS n
+    SELECT
+        dorg.dept_no AS root_dept_no,
+        dorg.dept_no AS dept_no
+    FROM dept_org dorg
+    WHERE dorg.org_no IS NULL
 
     UNION ALL
 
-    SELECT n + 1
-    FROM numbers
-    WHERE n < 37
+    SELECT
+        parent.root_dept_no,
+        child.dept_no
+    FROM dept_tree parent
+    INNER JOIN dept_org child
+        ON child.org_no = parent.dept_no
 )
-SELECT *
-FROM numbers;
+SELECT
+    dt.root_dept_no,
+    d.dept_name AS root_dept_name,
+    COUNT(DISTINCT de.emp_no) AS number_of_employees
+FROM dept_tree dt
+INNER JOIN departments d
+    ON dt.root_dept_no = d.dept_no
+LEFT JOIN dept_emp de
+    ON dt.dept_no = de.dept_no
+   AND de.to_date = '9999-01-01'
+GROUP BY
+    dt.root_dept_no,
+    d.dept_name
+ORDER BY
+    dt.root_dept_no;
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-WITH hired_before_year AS
+WITH RECURSIVE dept_name_hierarchy AS
 (
     SELECT
-        emp_no,
-        first_name,
-        last_name,
-        gender,
-        birth_date,
-        hire_date
-    FROM employees
-    WHERE YEAR(hire_date) < 1990
+        dorg.dept_no,
+        d.dept_name,
+        dorg.org_no AS parent_dept_no,
+        1 AS hierarchy_level,
+        CAST(d.dept_name AS CHAR(1000)) AS department_hierarchy
+    FROM dept_org dorg
+    INNER JOIN departments d
+        ON dorg.dept_no = d.dept_no
+    WHERE dorg.org_no IS NULL
+
+    UNION ALL
+
+    SELECT
+        child.dept_no,
+        d.dept_name,
+        child.org_no AS parent_dept_no,
+        parent.hierarchy_level + 1 AS hierarchy_level,
+        CONCAT(
+            parent.department_hierarchy,
+            ' -> ',
+            d.dept_name
+        ) AS department_hierarchy
+    FROM dept_name_hierarchy parent
+    INNER JOIN dept_org child
+        ON child.org_no = parent.dept_no
+    INNER JOIN departments d
+        ON child.dept_no = d.dept_no
 )
 SELECT
-    emp_no,
-    first_name,
-    last_name,
-    gender,
-    birth_date,
-    hire_date
-FROM hired_before_year
-ORDER BY hire_date;
+    dept_no,
+    dept_name,
+    parent_dept_no,
+    hierarchy_level,
+    department_hierarchy
+FROM dept_name_hierarchy
+ORDER BY department_hierarchy;
 
 
-
-
-
-
-
-/* ------------------------------------------------------------
-   Task 2c
-   Finding employees who worked in departments d004 and d005
-   and are living in the same city: Istanbul
-   Reusing the same view
-   ------------------------------------------------------------ */
-
-
-/* View containing employees, department history, and addresses */
-
-CREATE OR REPLACE VIEW emp_dept_address AS
-SELECT
-    e.emp_no,
-    e.first_name,
-    e.last_name,
-    de.dept_no,
-    de.from_date AS dept_from_date,
-    de.to_date AS dept_to_date,
-    ae.adr_type,
-    a.adr_no,
-    a.city,
-    a.street,
-    a.house_no,
-    a.post_code,
-    a.country
-FROM employees e
-JOIN dept_emp de
-    ON e.emp_no = de.emp_no
-JOIN adr_emp ae
-    ON e.emp_no = ae.emp_no
-JOIN address a
-    ON ae.adr_no = a.adr_no;
-
-
-/* Reuse the same view:
-   employees who worked in both d004 and d005
-   and live in Istanbul */
-
-SELECT
-    eda.emp_no,
-    eda.first_name,
-    eda.last_name,
-    eda.city,
-    eda.country,
-    eda.street,
-    eda.house_no,
-    eda.post_code
-FROM emp_dept_address eda
-WHERE eda.dept_no IN ('d004', 'd005')
-  AND eda.city = 'Istanbul'
-GROUP BY
-    eda.emp_no,
-    eda.first_name,
-    eda.last_name,
-    eda.city,
-    eda.country,
-    eda.street,
-    eda.house_no,
-    eda.post_code
-HAVING COUNT(DISTINCT eda.dept_no) = 2
-ORDER BY eda.emp_no;
