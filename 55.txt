@@ -1,4 +1,73 @@
-    WITH RECURSIVE dept_tree AS
+WITH RECURSIVE dept_tree AS
+(
+    SELECT
+        do.dept_no AS root_dept_no,
+        d.dept_name AS root_dept_name,
+        do.dept_no,
+        d.dept_name,
+        do.org_no,
+        1 AS depth_level,
+        CAST(do.dept_no AS CHAR(500)) AS dept_path,
+        CAST(d.dept_name AS CHAR(1000)) AS dept_name_path
+    FROM dept_org do
+    JOIN departments d
+        ON do.dept_no = d.dept_no
+    WHERE do.org_no IS NULL
+
+    UNION ALL
+
+    SELECT
+        parent.root_dept_no,
+        parent.root_dept_name,
+        child.dept_no,
+        d.dept_name,
+        child.org_no,
+        parent.depth_level + 1 AS depth_level,
+        CONCAT(parent.dept_path, ' -> ', child.dept_no) AS dept_path,
+        CONCAT(parent.dept_name_path, ' -> ', d.dept_name) AS dept_name_path
+    FROM dept_tree parent
+    JOIN dept_org child
+        ON child.org_no = parent.dept_no
+    JOIN departments d
+        ON child.dept_no = d.dept_no
+)
+SELECT
+    dt.root_dept_no,
+    dt.root_dept_name,
+    dt.dept_no,
+    dt.dept_name,
+    dt.depth_level,
+    dt.dept_path,
+    dt.dept_name_path,
+    COUNT(DISTINCT de.emp_no) AS total_employees
+FROM dept_tree dt
+LEFT JOIN dept_emp de
+    ON de.dept_no = dt.dept_no
+    AND de.to_date = '9999-01-01'
+GROUP BY
+    dt.root_dept_no,
+    dt.root_dept_name,
+    dt.dept_no,
+    dt.dept_name,
+    dt.depth_level,
+    dt.dept_path,
+    dt.dept_name_path
+ORDER BY
+    dt.dept_path;
+
+
+
+
+
+
+
+
+
+
+
+
+
+WITH RECURSIVE dept_tree AS
 (
     SELECT
         dorg.dept_no AS root_dept_no,
