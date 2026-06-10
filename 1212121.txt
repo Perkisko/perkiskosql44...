@@ -1,0 +1,201 @@
+/* =========================================================
+   Exercise 12 - Triggers
+   ========================================================= */
+
+
+/* =========================================================
+   1. Salary validation trigger
+   ========================================================= */
+
+DROP TRIGGER IF EXISTS salary_ok;
+
+DELIMITER $$
+
+CREATE TRIGGER salary_ok
+BEFORE INSERT ON salaries
+FOR EACH ROW
+BEGIN
+    IF NEW.salary < 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Warning: Negative Salary!';
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+/* Test:
+INSERT INTO salaries
+VALUES (19000, -1, '1998-01-01', '9999-12-31');
+*/
+
+
+/* =========================================================
+   2. Salary log table and salary update trigger
+   ========================================================= */
+
+DROP TRIGGER IF EXISTS salary_log;
+DROP TABLE IF EXISTS salaries_log;
+
+CREATE TABLE salaries_log (
+    emp_no INT NOT NULL,
+    old_salary INT NOT NULL,
+    new_salary INT NOT NULL,
+    changetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER $$
+
+CREATE TRIGGER salary_log
+AFTER UPDATE ON salaries
+FOR EACH ROW
+BEGIN
+    INSERT INTO salaries_log (emp_no, old_salary, new_salary)
+    VALUES (NEW.emp_no, OLD.salary, NEW.salary);
+END$$
+
+DELIMITER ;
+
+
+/* Test:
+UPDATE salaries
+SET salary = 70000
+WHERE emp_no = 19000
+  AND from_date = '1997-07-17';
+
+SELECT *
+FROM salaries_log;
+*/
+
+
+/* =========================================================
+   3a. Logging changes on department names
+   ========================================================= */
+
+DROP TRIGGER IF EXISTS departments_name_log;
+DROP TABLE IF EXISTS departments_log;
+
+CREATE TABLE departments_log (
+    dept_no CHAR(4) NOT NULL,
+    old_dept_name VARCHAR(40) NOT NULL,
+    new_dept_name VARCHAR(40) NOT NULL,
+    changetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER $$
+
+CREATE TRIGGER departments_name_log
+AFTER UPDATE ON departments
+FOR EACH ROW
+BEGIN
+    IF OLD.dept_name <> NEW.dept_name THEN
+        INSERT INTO departments_log (
+            dept_no,
+            old_dept_name,
+            new_dept_name
+        )
+        VALUES (
+            OLD.dept_no,
+            OLD.dept_name,
+            NEW.dept_name
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+/* Test:
+UPDATE departments
+SET dept_name = 'New Department Name'
+WHERE dept_no = 'd001';
+
+SELECT *
+FROM departments_log;
+*/
+
+
+/* =========================================================
+   3b. Checking hire date of employee
+       Minimum age used: 16 years
+   ========================================================= */
+
+DROP TRIGGER IF EXISTS employee_hire_date_insert_check;
+DROP TRIGGER IF EXISTS employee_hire_date_update_check;
+
+DELIMITER $$
+
+CREATE TRIGGER employee_hire_date_insert_check
+BEFORE INSERT ON employees
+FOR EACH ROW
+BEGIN
+    IF NEW.hire_date < DATE_ADD(NEW.birth_date, INTERVAL 16 YEAR) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Hire date cannot be earlier than birth date plus 16 years.';
+    END IF;
+END$$
+
+CREATE TRIGGER employee_hire_date_update_check
+BEFORE UPDATE ON employees
+FOR EACH ROW
+BEGIN
+    IF NEW.hire_date < DATE_ADD(NEW.birth_date, INTERVAL 16 YEAR) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Hire date cannot be earlier than birth date plus 16 years.';
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+/* Test:
+INSERT INTO employees
+VALUES (999999, '2010-01-01', 'Test', 'Employee', 'M', '2020-01-01');
+*/
+
+
+/* =========================================================
+   3c. Checking that one employee is not manager
+       of another department at the same time
+   ========================================================= */
+
+DROP TRIGGER IF EXISTS manager_one_department_insert_check;
+DROP TRIGGER IF EXISTS manager_one_department_update_check;
+
+DELIMITER $$
+
+CREATE TRIGGER manager_one_department_insert_check
+BEFORE INSERT ON dept_manager
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM dept_manager dm
+        WHERE dm.emp_no = NEW.emp_no
+          AND dm.dept_no <> NEW.dept_no
+          AND NEW.from_date <= dm.to_date
+          AND NEW.to_date >= dm.from_date
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'This employee is already manager of another department.';
+    END IF;
+END$$
+
+CREATE TRIGGER manager_one_department_update_check
+BEFORE UPDATE ON dept_manager
+FOR EACH ROW
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM dept_manager dm
+        WHERE dm.emp_no = NEW.emp_no
+          AND dm.dept_no <> NEW.dept_no
+          AND NEW.from_date <= dm.to_date
+          AND NEW.to_date >= dm.from_date
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'This employee is already manager of another department.';
+    END IF;
+END$$
+
+DELIMITER ;
