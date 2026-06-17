@@ -1,1 +1,133 @@
+/* =========================================================
+   Exercise 13 - Indexes
+   Task: Counting employees per department per gender
+   ========================================================= */
 
+
+/* 
+   1. Run the query before creating the index.
+   Note the execution time in MySQL Workbench.
+*/
+
+SELECT
+    d.dept_no,
+    d.dept_name,
+    e.gender,
+    COUNT(*) AS number_of_employees
+FROM dept_emp de
+JOIN departments d
+    ON de.dept_no = d.dept_no
+JOIN employees e
+    ON de.emp_no = e.emp_no
+WHERE de.to_date = '9999-01-01'
+GROUP BY
+    d.dept_no,
+    d.dept_name,
+    e.gender
+ORDER BY
+    d.dept_no,
+    e.gender;
+
+
+/*
+   2. Check the execution plan before the index.
+*/
+
+EXPLAIN
+SELECT
+    d.dept_no,
+    d.dept_name,
+    e.gender,
+    COUNT(*) AS number_of_employees
+FROM dept_emp de
+JOIN departments d
+    ON de.dept_no = d.dept_no
+JOIN employees e
+    ON de.emp_no = e.emp_no
+WHERE de.to_date = '9999-01-01'
+GROUP BY
+    d.dept_no,
+    d.dept_name,
+    e.gender
+ORDER BY
+    d.dept_no,
+    e.gender;
+
+
+/*
+   3. Create an index to optimize the query.
+   This index helps with:
+   - filtering current employees by to_date
+   - grouping by department
+   - joining with employees using emp_no
+*/
+
+CREATE INDEX idx_dept_emp_current_dept_emp
+ON dept_emp (to_date, dept_no, emp_no);
+
+
+/*
+   4. Run the query again after creating the index.
+   Note the execution time again and compare it with the first result.
+*/
+
+SELECT
+    d.dept_no,
+    d.dept_name,
+    e.gender,
+    COUNT(*) AS number_of_employees
+FROM dept_emp de
+JOIN departments d
+    ON de.dept_no = d.dept_no
+JOIN employees e
+    ON de.emp_no = e.emp_no
+WHERE de.to_date = '9999-01-01'
+GROUP BY
+    d.dept_no,
+    d.dept_name,
+    e.gender
+ORDER BY
+    d.dept_no,
+    e.gender;
+
+
+/*
+   5. Check the execution plan after the index.
+   MySQL should use idx_dept_emp_current_dept_emp.
+*/
+
+EXPLAIN
+SELECT
+    d.dept_no,
+    d.dept_name,
+    e.gender,
+    COUNT(*) AS number_of_employees
+FROM dept_emp de
+JOIN departments d
+    ON de.dept_no = d.dept_no
+JOIN employees e
+    ON de.emp_no = e.emp_no
+WHERE de.to_date = '9999-01-01'
+GROUP BY
+    d.dept_no,
+    d.dept_name,
+    e.gender
+ORDER BY
+    d.dept_no,
+    e.gender;
+
+
+/*
+   6. Conclusion:
+   Yes, there should be an improvement.
+   After creating the index, MySQL can find current department
+   assignments faster using to_date, dept_no, and emp_no.
+   This reduces the need to scan the whole dept_emp table.
+*/
+
+
+/*
+   7. Optional cleanup after presenting the result to the teacher.
+*/
+
+DROP INDEX idx_dept_emp_current_dept_emp ON dept_emp;
